@@ -14,6 +14,8 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+
 # Load Environment Variables
 load_dotenv()
 
