@@ -22,3 +22,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
+
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'profile_image']
+        read_only_fields = ['id', 'username']

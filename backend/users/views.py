@@ -1,10 +1,11 @@
-from rest_framework import generics, status
-from .serializers import RegisterSerializer, UserSerializer
+from rest_framework import generics, status, permissions
+from .serializers import RegisterSerializer, UserSerializer, UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 
 User = get_user_model()  # ✅ Dynamically gets the custom user model
 
@@ -16,6 +17,7 @@ class RegisterView(generics.CreateAPIView):
 
 # Login View
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -30,15 +32,6 @@ def login(request):
         })
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
-# Logout View
-@api_view(['POST'])
-def logout(request):
-    try:
-        # Blacklist or invalidate the token here if required
-        return Response({"message": "Logged out successfully"}, status=200)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 @api_view(['POST'])
 def logout(request):
     try:
@@ -48,3 +41,25 @@ def logout(request):
         return Response({"message": "Successfully logged out"}, status=status.HTTP_205_RESET_CONTENT)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user  # ✅ Get the currently logged-in user
+
+@api_view(['PUT'])
+@permission_classes([permissions.IsAuthenticated])
+def change_password(request):
+    user = request.user
+    old_password = request.data.get('old_password')
+    new_password = request.data.get('new_password')
+    
+    if not user.check_password(old_password):
+        return Response({"error": "Old password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    user.password = make_password(new_password)
+    user.save()
+    return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
