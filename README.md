@@ -1,7 +1,3 @@
-Here’s a clean and well-structured version of your README.md file:
-
-⸻
-
 ##### Shoply — E-commerce Platform
 
 Shoply is a full-stack e-commerce platform built with Django Rest Framework (DRF) and React.js, offering a secure and scalable solution for modern online stores. It provides essential features such as JWT authentication, product management, order processing, and a responsive UI.
