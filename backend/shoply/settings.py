@@ -157,3 +157,14 @@ CORS_ALLOWED_ORIGINS = [
 
 # Default Auto Field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ✅ Cấu hình gửi email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'chithai1999@gmail.com'  # Thay bằng email thật
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  # Thay bằng mật khẩu email thật
+
+# ✅ URL frontend để người dùng truy cập đặt lại mật khẩu
+FRONTEND_URL = "http://localhost:3000"
