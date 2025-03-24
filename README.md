@@ -1,12 +1,12 @@
 ⸻
 
-Shoply — E-commerce Platform
+###Shoply — E-commerce Platform
 
 Shoply is a modern, full-stack e-commerce platform built with Django Rest Framework (DRF) and React.js, offering a secure and scalable solution for online stores. It provides essential features such as JWT authentication, product and order management, and responsive design.
 
 ⸻
 
-Features
+##Features
 	•	Authentication: JWT-based authentication (Register/Login).
 	•	Product Management: CRUD operations for products.
 	•	Order Management: Cart and order processing.
@@ -16,15 +16,15 @@ Features
 
 ⸻
 
-Technologies Used
+##Technologies Used
 
-Backend:
+#Backend:
 	•	Django (Python 3.x)
 	•	Django Rest Framework (DRF)
 	•	PostgreSQL (or any preferred database)
 	•	JWT (JSON Web Tokens) for authentication
 
-Frontend:
+#Frontend:
 	•	React.js (JavaScript)
 	•	Redux Toolkit for state management
 	•	Axios for HTTP requests
@@ -32,9 +32,9 @@ Frontend:
 
 ⸻
 
-Getting Started
+##Getting Started
 
-Prerequisites:
+#Prerequisites:
 	•	Python 3.8+
 	•	Node.js v16+
 	•	PostgreSQL (or any preferred database)
@@ -42,9 +42,9 @@ Prerequisites:
 
 ⸻
 
-Installation
+##Installation
 
-Backend Setup
+#Backend Setup
 	1.	Clone the repository:
 
 git clone https://github.com/yourusername/shoply.git
@@ -87,7 +87,7 @@ python manage.py runserver
 
 ⸻
 
-Frontend Setup
+##Frontend Setup
 	1.	Navigate to the frontend directory:
 
 cd ../frontend
@@ -109,7 +109,7 @@ npm start
 
 ⸻
 
-Project Structure
+##Project Structure
 
 Shoply/
 ├── backend/
@@ -131,7 +131,7 @@ Shoply/
 
 ⸻
 
-Contributing
+##Contributing
 
 Contributions are welcome!
 	1.	Fork the repository.
@@ -181,7 +181,7 @@ For more information, please refer to <https://unlicense.org>
 
 ⸻
 
-Contact
+##Contact
 
 Trần Chí Thái — LinkedIn
 Email: chithai1999@gmail.com
