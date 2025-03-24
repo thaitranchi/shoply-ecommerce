@@ -1,4 +1,4 @@
-##### Shoply — E-commerce Platform
+# Shoply — E-commerce Platform
 
 Shoply is a full-stack e-commerce platform built with Django Rest Framework (DRF) and React.js, offering a secure and scalable solution for modern online stores. It provides essential features such as JWT authentication, product management, order processing, and a responsive UI.
 
@@ -14,15 +14,15 @@ Shoply is a full-stack e-commerce platform built with Django Rest Framework (DRF
 
 ⸻
 
-#### 🛠️ Technologies Used
+### 🛠️ Technologies Used
 
-### Backend:
+#### Backend:
 	•	Django — Python web framework.
 	•	Django Rest Framework (DRF) — API development.
 	•	PostgreSQL — Relational database.
 	•	JWT (JSON Web Tokens) — Secure authentication.
 
-### Frontend:
+#### Frontend:
 	•	React.js — Modern frontend library.
 	•	Redux Toolkit — State management.
 	•	Axios — HTTP requests.
@@ -30,9 +30,9 @@ Shoply is a full-stack e-commerce platform built with Django Rest Framework (DRF
 
 ⸻
 
-#### ⚙️ Getting Started
+### ⚙️ Getting Started
 
-### Prerequisites:
+#### Prerequisites:
 	•	Python 3.8+
 	•	Node.js v16+
 	•	PostgreSQL (or preferred database)
@@ -40,9 +40,9 @@ Shoply is a full-stack e-commerce platform built with Django Rest Framework (DRF
 
 ⸻
 
-#### 🏗️ Installation
+### 🏗️ Installation
 
-### ✅ Backend Setup
+#### ✅ Backend Setup
 	1.	Clone the repository:
 
 git clone https://github.com/yourusername/shoply.git
@@ -84,7 +84,7 @@ python manage.py runserver
 
 ⸻
 
-### ✅ Frontend Setup
+#### ✅ Frontend Setup
 	1.	Navigate to the frontend directory:
 
 cd ../frontend
