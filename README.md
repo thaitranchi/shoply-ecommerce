@@ -1,50 +1,52 @@
-⸻
-
-###Shoply — E-commerce Platform
-
-Shoply is a modern, full-stack e-commerce platform built with Django Rest Framework (DRF) and React.js, offering a secure and scalable solution for online stores. It provides essential features such as JWT authentication, product and order management, and responsive design.
+Here’s a clean and well-structured version of your README.md file:
 
 ⸻
 
-##Features
-	•	Authentication: JWT-based authentication (Register/Login).
-	•	Product Management: CRUD operations for products.
-	•	Order Management: Cart and order processing.
-	•	Secure Payments: (Planned integration with Stripe/PayPal).
-	•	Role-Based Access: Admin and user management.
-	•	Responsive UI: Optimized for mobile and desktop.
+##### Shoply — E-commerce Platform
+
+Shoply is a full-stack e-commerce platform built with Django Rest Framework (DRF) and React.js, offering a secure and scalable solution for modern online stores. It provides essential features such as JWT authentication, product management, order processing, and a responsive UI.
 
 ⸻
 
-##Technologies Used
-
-#Backend:
-	•	Django (Python 3.x)
-	•	Django Rest Framework (DRF)
-	•	PostgreSQL (or any preferred database)
-	•	JWT (JSON Web Tokens) for authentication
-
-#Frontend:
-	•	React.js (JavaScript)
-	•	Redux Toolkit for state management
-	•	Axios for HTTP requests
-	•	Tailwind CSS / Material UI (or preferred UI library)
+### 🚀 Features
+	•	🔑 Authentication: JWT-based secure login and registration.
+	•	📦 Product Management: Full CRUD operations for products.
+	•	🛒 Order Management: Cart functionality with order tracking.
+	•	💳 Secure Payments: (Planned integration with Stripe/PayPal).
+	•	🛂 Role-Based Access: Admin and user management.
+	•	📱 Responsive Design: Mobile-first, user-friendly interface.
 
 ⸻
 
-##Getting Started
+#### 🛠️ Technologies Used
 
-#Prerequisites:
+### Backend:
+	•	Django — Python web framework.
+	•	Django Rest Framework (DRF) — API development.
+	•	PostgreSQL — Relational database.
+	•	JWT (JSON Web Tokens) — Secure authentication.
+
+### Frontend:
+	•	React.js — Modern frontend library.
+	•	Redux Toolkit — State management.
+	•	Axios — HTTP requests.
+	•	Tailwind CSS / Material UI — Styling & UI components.
+
+⸻
+
+#### ⚙️ Getting Started
+
+### Prerequisites:
 	•	Python 3.8+
 	•	Node.js v16+
-	•	PostgreSQL (or any preferred database)
+	•	PostgreSQL (or preferred database)
 	•	Git
 
 ⸻
 
-##Installation
+#### 🏗️ Installation
 
-#Backend Setup
+### ✅ Backend Setup
 	1.	Clone the repository:
 
 git clone https://github.com/yourusername/shoply.git
@@ -55,12 +57,11 @@ cd shoply/backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-	3.	Install backend dependencies:
+	3.	Install dependencies:
 
 pip install -r requirements.txt
 
-	4.	Set up .env file:
-Create a .env file in the backend root directory with:
+	4.	Create a .env file:
 
 SECRET_KEY=your_django_secret_key
 DEBUG=True
@@ -87,12 +88,12 @@ python manage.py runserver
 
 ⸻
 
-##Frontend Setup
+### ✅ Frontend Setup
 	1.	Navigate to the frontend directory:
 
 cd ../frontend
 
-	2.	Install frontend dependencies:
+	2.	Install dependencies:
 
 npm install
 
@@ -109,15 +110,15 @@ npm start
 
 ⸻
 
-##Project Structure
+### 📂 Project Structure
 
 Shoply/
 ├── backend/
 │   ├── manage.py
 │   ├── .env
-│   ├── shoply/ (Django project)
-│   ├── products/ (Django app)
-│   └── orders/ (Django app)
+│   ├── shoply/             # Django project
+│   ├── products/           # Product app
+│   └── orders/             # Order app
 ├── frontend/
 │   ├── public/
 │   ├── src/
@@ -131,7 +132,23 @@ Shoply/
 
 ⸻
 
-##Contributing
+### 🔍 API Endpoints
+
+Auth:
+	•	POST /api/auth/register — Register a new user.
+	•	POST /api/auth/login — Authenticate and receive JWT.
+
+Products:
+	•	GET /api/products — List all products.
+	•	POST /api/products — Create a new product (Admin).
+
+Orders:
+	•	GET /api/orders — Get user orders.
+	•	POST /api/orders — Place a new order.
+
+⸻
+
+### 🤝 Contributing
 
 Contributions are welcome!
 	1.	Fork the repository.
@@ -151,7 +168,7 @@ git push origin feature/AmazingFeature
 
 ⸻
 
-License
+### 📝 License
 
 This project is released under The Unlicense — a public domain dedication.
 
@@ -181,7 +198,7 @@ For more information, please refer to <https://unlicense.org>
 
 ⸻
 
-##Contact
+### 📫 Contact
 
 Trần Chí Thái — LinkedIn
 Email: chithai1999@gmail.com
