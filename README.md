@@ -107,7 +107,7 @@ npm start
 ⸻
 
 ### 📂 Project Structure
-
+```
 Shoply/
 ├── backend/
 │   ├── manage.py
@@ -123,8 +123,7 @@ Shoply/
 │       ├── redux/
 │       ├── utils/
 │   └── .env
-
-
+```
 
 ⸻
 
@@ -167,7 +166,7 @@ git push origin feature/AmazingFeature
 ### 📝 License
 
 This project is released under The Unlicense — a public domain dedication.
-
+```
 This is free and unencumbered software released into the public domain.
 
 Anyone is free to copy, modify, publish, use, compile, sell, or distribute this 
@@ -187,7 +186,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN 
 ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+```
 For more information, please refer to <https://unlicense.org>
 
 
