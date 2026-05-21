@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, exceptions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -8,7 +8,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator
-from django.core.exceptions import ValidationError
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -59,13 +58,13 @@ def send_verification_email(request, user):
 # Helper function to validate password strength
 def validate_password_strength(password):
     if len(password) < 8:
-        raise ValidationError("Password must be at least 8 characters long.")
+        raise exceptions.ValidationError("Password must be at least 8 characters long.")
     if not re.search(r"\d", password):  # Check for digits
-        raise ValidationError("Password must contain at least one digit.")
+        raise exceptions.ValidationError("Password must contain at least one digit.")
     if not re.search(r"[A-Z]", password):  # Check for uppercase letter
-        raise ValidationError("Password must contain at least one uppercase letter.")
+        raise exceptions.ValidationError("Password must contain at least one uppercase letter.")
     if not re.search(r"\W", password):  # Special characters
-        raise ValidationError("Password must contain at least one special character.")
+        raise exceptions.ValidationError("Password must contain at least one special character.")
 
 # Register View
 class RegisterView(generics.CreateAPIView):

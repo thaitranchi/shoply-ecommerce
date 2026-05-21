@@ -3,8 +3,8 @@ import type { Product } from "@/app/types/product";
 
 interface ProductGridProps {
   products?: Product[]; // Optional để hỗ trợ fallback
-  type?: string; // Add the 'type' prop to the interface
-  category?: string; // Add the optional 'category' property
+  type?: string;
+  category?: string;
 }
 
 export function ProductGrid({ products = [] }: ProductGridProps) {
