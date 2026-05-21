@@ -14,10 +14,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
-
 # Load Environment Variables
 load_dotenv()
+
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 
 # Define BASE_DIR using Pathlib
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', '.vercel.app']
 
 
 # Application definition
@@ -151,9 +151,11 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    os.getenv('FRONTEND_URL', "https://your-frontend-project.vercel.app"),
 ]
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Allow all during development
 
 # Default Auto Field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -167,4 +169,4 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  # Thay bằng email thật
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  # Thay bằng mật khẩu email thật
 
 # ✅ URL frontend để người dùng truy cập đặt lại mật khẩu
-FRONTEND_URL = "http://localhost:3000"
+FRONTEND_URL = os.getenv('FRONTEND_URL', "http://localhost:3000")

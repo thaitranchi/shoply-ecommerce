@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "public": true,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/old-blog/:path*",
+      "destination": "/blog/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/proxy/:path*",
+      "destination": "https://api.external-service.com/:path*" 
+    },
+    {
+      "source": "/_/backend/:path*",
+      "destination": "https://your-backend-app.onrender.com/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
+      ]
+    }
+  ],
+  "functions": {
+    "api/test.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
+}
