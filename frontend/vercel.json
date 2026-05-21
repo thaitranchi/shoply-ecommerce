@@ -17,7 +17,7 @@
     },
     {
       "source": "/_/backend/:path*",
-      "destination": "https://your-backend-app.onrender.com/:path*"
+      "destination": "https://shoply-ecommerce-jpl3.onrender.com/:path*"
     }
   ],
   "headers": [
