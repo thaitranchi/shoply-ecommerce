@@ -9,11 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.3.0",
     "class-variance-authority": "^0.7.1",
     "keen-slider": "^6.8.6",
     "lucide-react": "^0.487.0",
-    "next": "^16.2.6",
+    "next": "15.1.7",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "swiper": "^11.2.6"
