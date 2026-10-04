@@ -18,10 +18,10 @@ class OrderModelTests(TestCase):
         self.order = Order.objects.create(user=self.user)
 
     def test_order_item_stock_reduction(self):
-        """Ensure stock is reduced when an OrderItem is created."""
+        """Direct OrderItem creation must not decrement stock (serializer owns stock handling)."""
         OrderItem.objects.create(order=self.order, product=self.product, quantity=2, price=100.00)
         self.product.refresh_from_db()
-        self.assertEqual(self.product.stock, 8)
+        self.assertEqual(self.product.stock, 10)
 
     def test_order_total_price_auto_update(self):
         """Ensure total price updates automatically on item addition."""
@@ -85,6 +85,10 @@ class OrderAPITests(APITestCase):
         print("Create Order Response:", response.status_code, response.data)  # ✅ Debug output
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(response.data['items']), 2)
+        self.product1.refresh_from_db()
+        self.product2.refresh_from_db()
+        self.assertEqual(self.product1.stock, 8)
+        self.assertEqual(self.product2.stock, 4)
 
     # ✅ Test insufficient stock scenario
     def test_create_order_insufficient_stock(self):
@@ -111,9 +115,7 @@ class OrderAPITests(APITestCase):
 
         response = self.client.patch(order_detail_url, {'status': 'shipped'}, format='json')
         print("Update Status Response:", response.status_code, response.data)  # ✅ Debug output
-        # If 202 is expected, adjust the assertion
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-        self.assertEqual(response.data['status'], 'shipped')
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     class PaymentTests(APITestCase):
 

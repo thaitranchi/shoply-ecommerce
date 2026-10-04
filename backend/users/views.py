@@ -22,20 +22,7 @@ from django.contrib.auth.models import User
 
 User = get_user_model()
 
-class ChangePasswordView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def put(self, request):
-        user = request.user
-        old_password = request.data.get('old_password')
-        new_password = request.data.get('new_password')
-
-        if not user.check_password(old_password):
-            return Response({"error": "Incorrect old password"}, status=status.HTTP_400_BAD_REQUEST)
-        validate_password_strength(new_password)
-        user.password = make_password(new_password)
-        user.save()
-        return Response({"message": "Password changed successfully."}, status=status.HTTP_200_OK)
+# Login View
 
 # Helper function for sending email verification
 def send_verification_email(request, user):
@@ -100,6 +87,22 @@ def login_view(request):
     else:
         return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
 
+# Change Password View (routed view)
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+
+        if not user.check_password(old_password):
+            return Response({"error": "Incorrect old password"}, status=status.HTTP_400_BAD_REQUEST)
+        validate_password_strength(new_password)
+        user.password = make_password(new_password)
+        user.save()
+        return Response({"message": "Password changed successfully."}, status=status.HTTP_200_OK)
+
 # User Profile View
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
@@ -108,36 +111,19 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user  # Get the currently logged-in user
 
-# Change Password View
-@api_view(['PUT'])
-@permission_classes([permissions.IsAuthenticated])
-def change_password(request):
-    user = request.user
-    old_password = request.data.get('old_password')
-    new_password = request.data.get('new_password')
-
-    if not user.check_password(old_password):
-        return Response({"error": "Old password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
-
-    validate_password_strength(new_password)  # Validate new password strength
-    user.password = make_password(new_password)
-    user.save()
-    return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
-
 # Password Reset Flow
-def generate_password_reset_token(user):
-    token = default_token_generator.make_token(user)  # Generate password reset token
-    return token
-
-def send_password_reset_email(user, token):
-    if not default_token_generator.check_token(user, token):
-        return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
-    reset_link = f"{settings.FRONTEND_URL}/password-reset-confirm/?token={token}"
+def send_password_reset_email(request, user):
+    token = default_token_generator.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    reset_url = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+    reset_link = f"{settings.FRONTEND_URL}{reset_url}"
     subject = "Đặt lại mật khẩu của bạn"
     message = f"Nhấp vào liên kết sau để đặt lại mật khẩu của bạn: {reset_link}"
     send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email])
 
 class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -145,38 +131,39 @@ class PasswordResetRequestView(APIView):
 
         try:
             user = User.objects.get(email=email)
+            send_password_reset_email(request, user)
         except User.DoesNotExist:
-            return Response({"error": "Email không tồn tại trong hệ thống."}, status=status.HTTP_400_BAD_REQUEST)
+            pass
 
-        token = generate_password_reset_token(user)
-        send_password_reset_email(user, token)
-
-        return Response({"message": "Email đặt lại mật khẩu đã được gửi."}, status=status.HTTP_200_OK)
+        return Response({"message": "If that email exists, a password reset link has been sent."}, status=status.HTTP_200_OK)
 
 class PasswordResetConfirmView(APIView):
-    def post(self, request, token):
-        email = request.data.get('email')
+    permission_classes = [AllowAny]
+
+    def post(self, request, uidb64, token):
         new_password = request.data.get('new_password')
 
-        # Handle missing data first
-        if not email or not new_password:
+        if not new_password:
             return Response({"error": "This field may not be blank."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if len(new_password) < 8:
-            return Response({"error": "Password is too short or not secure."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response({"detail": "Invalid reset link"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not default_token_generator.check_token(user, token):
+            return Response({"detail": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.get(email=email)
-            if not default_token_generator.check_token(user, token):
-                return Response({"detail": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+            validate_password_strength(new_password)
+        except exceptions.ValidationError as e:
+            return Response({"error": e.detail[0]}, status=status.HTTP_400_BAD_REQUEST)
 
-            user.set_password(new_password)
-            user.save()
+        user.set_password(new_password)
+        user.save()
 
-            return Response({"detail": "Password reset successful"}, status=status.HTTP_200_OK)
-
-        except User.DoesNotExist:
-            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Password reset successful"}, status=status.HTTP_200_OK)
 
 # Email Verification View
 class VerifyEmailView(APIView):

@@ -1,8 +1,6 @@
 from django.conf import settings
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
 from products.models import Product
 
 # orders/models.py
@@ -59,24 +57,12 @@ class OrderItem(models.Model):
 
     @transaction.atomic
     def save(self, *args, **kwargs):
-        """Ensure stock update is atomic and prevent race conditions."""
+        """Ensure atomicity and always price from the product."""
         with transaction.atomic():
-            product = Product.objects.select_for_update().get(id=self.product.id)
-
-            if self.quantity > product.stock:
-                raise ValidationError(f"Insufficient stock for {product.name}. Available: {product.stock}")
-
-            # If price is not set, use product price
             if not self.price:
+                product = Product.objects.get(id=self.product_id)
                 self.price = product.price
-
-            # Reduce stock
-            product.stock -= self.quantity
-            product.save()
-
             super().save(*args, **kwargs)
-
-            # Update order total price
             self.order.update_total_price()
 
     def __str__(self):
@@ -90,21 +76,3 @@ class OrderStatusHistory(models.Model):
 
     def __str__(self):
         return f"Order {self.order.id} changed from {self.previous_status} to {self.new_status} on {self.changed_at}"
-
-@receiver(post_save, sender=OrderItem)
-@receiver(post_delete, sender=OrderItem)
-def update_order_total(sender, instance, **kwargs):
-    order = instance.order
-    order.total_price = sum(item.price * item.quantity for item in order.items.all())
-    order.save()
-
-@receiver(post_save, sender=Order)
-def log_order_status_change(sender, instance, created, **kwargs):
-    if not created:
-        previous_status = instance.__class__.objects.get(pk=instance.pk).status
-        if previous_status != instance.status:
-            OrderStatusHistory.objects.create(
-                order=instance,
-                previous_status=previous_status,
-                new_status=instance.status
-            )

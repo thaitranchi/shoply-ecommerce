@@ -107,7 +107,10 @@ class PasswordResetTests(APITestCase):
         self.user.is_active = True
         self.user.save()
         self.password_reset_url = reverse('password_reset')
-        self.password_reset_confirm_url = reverse('password_reset_confirm', kwargs={'token': 'some-token'})
+        self.uidb64 = urlsafe_base64_encode(force_bytes(self.user.pk))
+        self.password_reset_confirm_url = reverse(
+            'password_reset_confirm', kwargs={'uidb64': self.uidb64, 'token': 'some-token'}
+        )
 
         # Obtain JWT token for authentication
         response = self.client.post('/api/users/login/', {
@@ -134,22 +137,21 @@ class PasswordResetTests(APITestCase):
         data = {"email": "testuser@example.com"}
         response = self.client.post(self.password_reset_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("Email đặt lại mật khẩu đã được gửi.", str(response.data))
+        self.assertIn("If that email exists", str(response.data))
 
     # ✅ Test sending password reset request with invalid email
     def test_request_password_reset_invalid_email(self):
         data = {"email": "nonexistent@example.com"}
         response = self.client.post(self.password_reset_url, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Email không tồn tại trong hệ thống.", str(response.data))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("If that email exists", str(response.data))
 
     def test_password_reset_confirm_valid_token(self):
         token = self.generate_reset_token(self.user)
-        self.password_reset_confirm_url = reverse('password_reset_confirm', kwargs={'token': token})
-        data = {
-            'email': self.user.email,
-            'new_password': 'new_secure_password123'
-        }
+        self.password_reset_confirm_url = reverse(
+            'password_reset_confirm', kwargs={'uidb64': self.uidb64, 'token': token}
+        )
+        data = {'new_password': 'New_secure_password123!'}
         response = self.client.post(self.password_reset_confirm_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['detail'], "Password reset successful")
@@ -157,7 +159,7 @@ class PasswordResetTests(APITestCase):
         # Log in with the new password
         login_response = self.client.post('/api/users/login/', {
             "username": "testuser",
-            "password": "new_secure_password123"
+            "password": "New_secure_password123!"
         })
         self.assertEqual(login_response.status_code, status.HTTP_200_OK)
 
@@ -169,18 +171,17 @@ class PasswordResetTests(APITestCase):
         }
         response = self.client.post(self.password_reset_confirm_url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("This field may not be blank.", str(response.data))  # Adjust message if needed
+        self.assertIn("This field may not be blank.", str(response.data))
 
     def test_password_reset_confirm_weak_password(self):
         token = self.generate_reset_token(self.user)
-        self.password_reset_confirm_url = reverse('password_reset_confirm', kwargs={'token': token})
-        data = {
-            "email": 'testuser@example.com',
-            "new_password": "123"  # Weak password
-        }
+        self.password_reset_confirm_url = reverse(
+            'password_reset_confirm', kwargs={'uidb64': self.uidb64, 'token': token}
+        )
+        data = {"new_password": "123"}  # Weak password
         response = self.client.post(self.password_reset_confirm_url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Password is too short or not secure.", str(response.data))  # Adjust the message as per your validation
+        self.assertIn("Password must be at least 8 characters long.", str(response.data))
 
 class EmailVerificationTests(APITestCase):
 
@@ -203,17 +204,18 @@ class EmailVerificationTests(APITestCase):
         Test if the email verification email is sent correctly
         """
         # Giả lập việc gửi email
+        mail.outbox.clear()
         self.client.post(self.register_url, {
-            "username": self.username,
-            "email": self.email,
-            "password": self.password
+            "username": "newuser",
+            "email": "newuser@example.com",
+            "password": "Testpassword123!"
         })
-        
+
         # Kiểm tra đã gửi đúng 1 email
         self.assertEqual(len(mail.outbox), 1)
         verification_email = mail.outbox[0]
-        self.assertIn(self.email, verification_email.to)
-        self.assertIn('Click the link below to verify your email address.', verification_email.body)
+        self.assertIn("newuser@example.com", verification_email.to)
+        self.assertIn('verify your email', verification_email.body.lower())
 
     def test_email_verification_successful(self):
         """

@@ -36,28 +36,23 @@ class OrderCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save()  # ✅ No need to pass user explicitly
 
-# ✅ Retrieve and update order details
-class OrderDetailView(generics.RetrieveUpdateAPIView):
+# ✅ Retrieve order details (customers can only view their own orders)
+class OrderDetailView(generics.RetrieveAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
 
-    def partial_update(self, request, *args, **kwargs):
-        allowed_fields = {'status', 'is_paid'}
-        if set(request.data.keys()) - allowed_fields:
-            return Response({"detail": "Only status and is_paid can be updated."}, status=400)
-        response = super().partial_update(request, *args, **kwargs)
-        return Response(response.data, status=202)
-
 class PaymentView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
-        serializer = PaymentSerializer(data=request.data)
+        serializer = PaymentSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             order_id = serializer.validated_data['order_id']
             token = serializer.validated_data['token']
-            order = Order.objects.get(id=order_id)
+            order = Order.objects.get(id=order_id, user=request.user)
 
             try:
                 # Create Stripe charge
@@ -82,22 +77,12 @@ class PaymentView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def update(self, request, *args, **kwargs):
-        order = self.get_object()
-        serializer = self.get_serializer(order, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        
-        if serializer.validated_data.get('payment_status') == 'success':
-            serializer.save(is_paid=True)
-        else:
-            serializer.save(is_paid=False)
-        
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
 class CancellationView(generics.UpdateAPIView):
-    queryset = Order.objects.all()
     serializer_class = CancellationSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
 
     def update(self, request, *args, **kwargs):
         order = self.get_object()

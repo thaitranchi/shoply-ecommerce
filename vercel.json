@@ -1,4 +1,14 @@
 {
   "rootDirectory": "frontend",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "rewrites": [
+    {
+      "source": "/api/proxy/:path*",
+      "destination": "https://api.external-service.com/:path*" 
+    },
+    {
+      "source": "/_/backend/:path*",
+      "destination": "https://shoply-ecommerce-kwl0.onrender.com/:path*"
+    }
+  ]
 }

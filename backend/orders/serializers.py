@@ -5,6 +5,7 @@ from products.models import Product
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.ReadOnlyField(source='product.name')
+    price = serializers.ReadOnlyField()
 
     class Meta:
         model = OrderItem
@@ -16,6 +17,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'created_at', 'total_price', 'is_paid', 'status', 'items']
+        read_only_fields = ['id', 'created_at', 'total_price', 'is_paid', 'status']
 
     def validate_items(self, value):
         if not value:
@@ -27,8 +29,7 @@ class OrderSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items', [])
         order = Order.objects.create(user=self.context['request'].user, **validated_data)
         total = 0
-        stock_rollback = []  # ✅ Track stock rollback
-        
+
         try:
             for item_data in items_data:
                 product = Product.objects.select_for_update().get(id=item_data['product'].id)
@@ -43,11 +44,10 @@ class OrderSerializer(serializers.ModelSerializer):
                     order=order,
                     product=product,
                     quantity=item_data['quantity'],
-                    price=item_data.get('price', product.price)
+                    price=product.price
                 )
 
                 total += float(order_item.price) * order_item.quantity
-                stock_rollback.append((product, item_data['quantity']))
                 product.stock -= item_data['quantity']
                 product.save()
 
@@ -56,11 +56,7 @@ class OrderSerializer(serializers.ModelSerializer):
             return order
 
         except Exception as e:
-            # ✅ Rollback stock on failure
-            for product, quantity in stock_rollback:
-                product.stock += quantity
-                product.save()
-            raise e  # Re-raise the exception after rollback
+            raise e
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
@@ -73,7 +69,11 @@ class PaymentSerializer(serializers.Serializer):
 
     def validate(self, data):
         try:
-            order = Order.objects.get(id=data['order_id'], is_paid=False)
+            order = Order.objects.get(
+                id=data['order_id'],
+                is_paid=False,
+                user=self.context['request'].user,
+            )
         except Order.DoesNotExist:
             raise serializers.ValidationError("Order not found or already paid.")
         return data
@@ -98,8 +98,15 @@ class CancellationSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-        # Simulate refund process if paid
-        if instance.is_paid:
-            validated_data['is_refunded'] = True
-            validated_data['refund_id'] = f"REF-{instance.id}"
-        return super().update(instance, validated_data)
+        with transaction.atomic():
+            if instance.is_paid:
+                validated_data['is_refunded'] = True
+                validated_data['refund_id'] = f"REF-{instance.id}"
+
+            if instance.status != 'cancelled':
+                for item in instance.items.select_related('product'):
+                    product = Product.objects.select_for_update().get(id=item.product_id)
+                    product.stock += item.quantity
+                    product.save()
+
+            return super().update(instance, validated_data)
